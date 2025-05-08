@@ -27,6 +27,9 @@ Route::middleware(['auth'])->group(function () {
 
     // route kelas
     Route::get('/kelas', [KelasController::class, 'index'])->name('kelas');
+    Route::get('/kelas/json_data', [KelasController::class, 'getData'])->name('kelas.json_data');
+    Route::put('/kelas/edit/{siswa_id}', [KelasController::class, 'editData'])->name('kelas.edit');
+    Route::delete('/kelas/hapus/{siswa_id}', [KelasController::class, 'deleteData'])->name('kelas.hapus');
 
     // route siswa
     Route::get('/siswa', [DashboardController::class, 'index'])->name('siswa');
