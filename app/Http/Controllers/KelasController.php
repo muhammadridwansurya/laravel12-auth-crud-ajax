@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\Models\Kelas;
 
 class KelasController extends Controller
@@ -12,7 +13,10 @@ class KelasController extends Controller
 
         $data = [
             'title' => 'Kelas',
-            'url_json' => route('kelas.json_data'),
+            'url_menu' => [
+                'url' => route('kelas'),
+                'url_json' => route('kelas.json_data'),
+            ],
             'breadcrumb' => [
                 [
                     'name' => 'Kelas',
@@ -31,8 +35,8 @@ class KelasController extends Controller
         $no = 1;
         if($kelas) {
             foreach($kelas as $item) {
-                $btn_edit = '<a class="btn btn-warning" onclick='."btnEdit('". route('kelas.edit', ['siswa_id' => $item->id]) ."')".' >Edit</i></a>';
-                $btn_hapus = '<a onclick='."btnDelete('". route('kelas.hapus', ['siswa_id' => $item->id]) ."')".' class="btn btn-danger">Hapus</a>';
+                $btn_edit = '<a href="javascript:void(0);" class="btn btn-warning btn-edit" data-id="'. $item->id .'">Edit</i></a>';
+                $btn_hapus = '<a href="javascript:void(0);" data-id="'. $item->id .'" class="btn btn-danger btn-delete">Hapus</a>';
 
                 $data[] = [
                     $no++,
@@ -50,18 +54,106 @@ class KelasController extends Controller
 
     }
 
+    public function getDataById($idKelas) // function untuk mengambil data berdasarkan id
+    {
+        $kelas = Kelas::getKelasById($idKelas);
+        if(!$kelas) {
+            return response()->json([
+                'status' => false,
+                'message' => 'data tidak ditemukan',
+            ])->header('Content-Type', 'application/json')->setStatusCode(404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $kelas,
+            'message' => 'data berhasil ditemukan',
+        ])->header('Content-Type', 'application/json')->setStatusCode(200);
+    }
+
     public function insertData(Request $request)
     {
+        $data = $request->only(['nama_kelas', 'status']);
 
+        $validator = Validator::make($data, [
+            'nama_kelas' => ['required', 'unique:kelas', 'min:3', 'max:255'],
+            'status' => ['required', 'in:1,0'],
+        ],[
+            'required' => ':attribute tidak boleh kosong.',
+            'unique' => ':attribute telah dipakai.',
+            'min' => ':attribute minimal :min.',
+            'max' => ':attribute maksimal :max.',
+            'in' => ':attribute tidak valid, hanya boleh data yang tersedia.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()
+            ], 422);
+        }
+
+        Kelas::insertKelas($data);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'data berhasil ditambahkan',
+        ])->header('Content-Type', 'application/json')->setStatusCode(201);
     }
 
-    public function updateData(Request $request, $siswa_id)
+    public function updateData(Request $request, $idKelas)
     {
+        $kelas = Kelas::getKelasById($idKelas);
+        if(!$kelas) {
+            return response()->json([
+                'status' => false,
+                'message' => 'data tidak ditemukan',
+            ])->header('Content-Type', 'application/json')->setStatusCode(404);
+        }
 
+        $data = $request->only(['nama_kelas', 'status']);
+
+        $validator = Validator::make($data, [
+            'nama_kelas' => ['required', 'min:3', 'max:255', 'unique:kelas,nama_kelas,' . $kelas->id],
+            'status' => ['required', 'in:1,0'],
+        ],[
+            'required' => ':attribute tidak boleh kosong.',
+            'unique' => ':attribute telah dipakai.',
+            'min' => ':attribute minimal :min.',
+            'max' => ':attribute maksimal :max.',
+            'in' => ':attribute tidak valid, hanya boleh data yang tersedia.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()
+            ], 422);
+        }
+
+        Kelas::updateKelas($data, $kelas->id);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'data berhasil diubah',
+        ])->header('Content-Type', 'application/json')->setStatusCode(200);
     }
 
-    public function deleteData(Request $request, $siswa_id)
+    public function deleteData(Request $request, $idKelas)
     {
+        $kelas = Kelas::getKelasById($idKelas);
+        if(!$kelas) {
+            return response()->json([
+                'status' => false,
+                'message' => 'data tidak ditemukan',
+            ])->header('Content-Type', 'application/json')->setStatusCode(404);
+        }
 
+        Kelas::deleteKelas($kelas->id);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'data berhasil dihapus',
+        ])->header('Content-Type', 'application/json')->setStatusCode(200);
     }
 }

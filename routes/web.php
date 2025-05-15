@@ -27,8 +27,10 @@ Route::middleware(['auth'])->group(function () {
 
     // route kelas
     Route::get('/kelas', [KelasController::class, 'index'])->name('kelas');
+    Route::get('/kelas/show/{idKelas}', [KelasController::class, 'getDataById'])->name('kelas.show');
     Route::get('/kelas/json_data', [KelasController::class, 'getData'])->name('kelas.json_data');
-    Route::put('/kelas/edit/{siswa_id}', [KelasController::class, 'editData'])->name('kelas.edit');
+    Route::post('/kelas/tambah', [KelasController::class, 'insertData'])->name('kelas.tambah');
+    Route::put('/kelas/edit/{siswa_id}', [KelasController::class, 'updateData'])->name('kelas.edit');
     Route::delete('/kelas/hapus/{siswa_id}', [KelasController::class, 'deleteData'])->name('kelas.hapus');
 
     // route siswa

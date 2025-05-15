@@ -30,22 +30,22 @@ class Kelas extends Model
         // query menampilkan data kelas hanya kolom id, nama_kelas, dan status. Lalu di urutkan nama_kelas berdasarkan asc
         // DB::table => query builder (mungkin sewaktu kita butuh query builder ketimbang eloquent)
         $query = DB::table('kelas AS a')
-                        ->selectRaw("a.id, a.nama_kelas, a.status")
-                        ->orderBy('a.nama_kelas', 'asc')
-                        ->get();
+            ->selectRaw("a.id, a.nama_kelas, a.status")
+            ->orderBy('a.nama_kelas', 'asc')
+            ->get();
 
         return $query;
     }
 
     public static function getKelasById($id)
     {
-        $query = DB::table('kelas AS a')
-                        ->select("a.id, a.nama_kelas, a.status")
-                        ->where('a.id', $id)
-                        ->first();
-
+        $query = DB::table('kelas as a')
+                    ->select(['a.id', 'a.nama_kelas', 'a.status'])
+                    ->where('a.id', $id)
+                    ->first();
         return $query;
     }
+
 
     public static function insertKelas($data)
     {
