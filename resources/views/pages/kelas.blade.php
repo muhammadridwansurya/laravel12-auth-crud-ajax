@@ -78,8 +78,8 @@
                                 <label class="form-label">Status</label>
                                 <select class="form-control" name="status">
                                     <option value="">Pilih Status</option>
-                                    <option value="1">Aktif</option>
-                                    <option value="0">Tidak Aktif</option>
+                                    <option value="true">Aktif</option>
+                                    <option value="false">Tidak Aktif</option>
                                 </select>
                                 <div class="invalid-feedback"></div>
                             </div>
@@ -103,14 +103,16 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Apakah anda yakin?</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <form method="post" id="confirmDelete">
                     <div class="modal-body">
                         Data yang dihapus tidak dapat dikembalikan!
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn me-auto" data-bs-dismiss="modal">Tutup</button>
+                         <button type="button" class="btn btn-default" data-dismiss="modal">Kembali</button>
                         <button type="submit" class="btn btn-danger" data-bs-dismiss="modal">Hapus</button>
                     </div>
                 </form>
@@ -238,6 +240,7 @@
                         alert_message('success', response.message);
                     },
                     error: function(xhr) {
+                        console.log(xhr)
                         alert_message('error', xhr.statusText);
                     }
                 });
@@ -264,8 +267,9 @@
                             .isArray(errors)) {
                             Object.entries(errors).forEach(([key, val]) => {
                                 $('[name="' + key + '"]').addClass('is-invalid');
-                                $('[name="' + key + '"]').next('.invalid-feedback')
-                                    .text(val[0]);
+                                 // cek kalau val itu array, ambil index 0, kalau bukan array langsung tampilkan val
+                                const errorMessage = Array.isArray(val) ? val[0] : val;
+                                $('[name="' + key + '"]').next('.invalid-feedback').text(errorMessage);
                             });
                         } else {
                             alert_message('error', xhr.statusText);
